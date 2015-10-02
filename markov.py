@@ -1,6 +1,7 @@
 import sys
 from random import choice
-
+import os
+import twitter
 
 class MarkovMachine(object):
 
@@ -47,18 +48,32 @@ class MarkovMachine(object):
 
             word = choice(self.chains[key])
             words.append(word)
+
             key = (key[1], word)
 
         text = " ".join(words)
 
         # This is the clumsiest way to make sure it's never longer than
         # 140 characters; can you think of better ways?
-        return text[:140]
+        return text.split('. ', 1)[1][:140]
 
 
 if __name__ == "__main__":
     filenames = sys.argv[1:]
-
     generator = MarkovMachine()
     generator.read_files(filenames)
-    print generator.make_text()
+    tweeted_text = generator.make_text()
+    print tweeted_text
+
+
+    api = twitter.Api(
+        consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
+        consumer_secret=os.environ['TWITTER_CONSUMER_SECRET'],
+        access_token_key=os.environ['TWITTER_ACCESS_TOKEN_KEY'],
+        access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET'])
+
+    #This will print info about credentials to make sure they are correct
+    #print api.VerifyCredentials()
+
+    #Send tweet
+    #status = api.PostUpdate(tweeted_text)
